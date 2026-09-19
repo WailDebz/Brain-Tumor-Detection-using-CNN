@@ -1,6 +1,8 @@
 """Unit tests for project configuration and path resolution."""
 
 from pathlib import Path
+import pytest
+
 from src.config import (
     APP_DIR,
     CLASS_LABELS,
@@ -42,3 +44,28 @@ def test_default_constants():
     assert NUM_CHANNELS == 1
     assert CLASS_LABELS == ["No Tumor", "Tumor"]
     assert 0.0 < DECISION_THRESHOLD < 1.0
+
+
+def test_data_pipeline_config():
+    """Verify data pipeline and split configurations."""
+    from src.config import (
+        CLASS_TO_LABEL,
+        DEFAULT_BATCH_SIZE,
+        DEFAULT_SPLIT_RATIOS,
+        LABEL_TO_CLASS,
+        PROCESSED_DATA_DIR,
+        RANDOM_SEED,
+        RAW_DATA_DIR,
+        SUPPORTED_IMAGE_EXTENSIONS,
+    )
+
+    assert RAW_DATA_DIR.name == "raw"
+    assert PROCESSED_DATA_DIR.name == "processed"
+    assert CLASS_TO_LABEL == {"no": 0, "yes": 1}
+    assert LABEL_TO_CLASS == {0: "No Tumor", 1: "Tumor"}
+    assert {".jpg", ".jpeg", ".png"}.issubset(SUPPORTED_IMAGE_EXTENSIONS)
+    assert sum(DEFAULT_SPLIT_RATIOS) == pytest.approx(1.0)
+    assert DEFAULT_SPLIT_RATIOS == (0.70, 0.15, 0.15)
+    assert RANDOM_SEED == 42
+    assert DEFAULT_BATCH_SIZE == 32
+

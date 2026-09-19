@@ -53,7 +53,27 @@ pip install -e ".[dev]"
 
 ---
 
-## 4. Running the Streamlit Web Application
+## 4. Dataset Preparation & Leak-Free Splitting
+
+To prepare, validate, deduplicate, and split a local dataset:
+
+1. Place your raw brain MRI scan images into `data/raw/no/` and `data/raw/yes/`.
+2. Run the dataset preparation and validation script:
+
+```bash
+python scripts/prepare_data.py --data-dir data/raw --output-dir data/processed
+```
+
+This CLI utility will:
+- Validate each image file and filter corrupt or empty files.
+- Compute SHA-256 hashes to detect and prevent duplicate sample leakage.
+- Generate stratified Train (70%), Validation (15%), and Test (15%) splits on original scans.
+- Assert zero sample or hash overlap across partitions.
+- Output split manifest CSVs into `data/processed/`.
+
+---
+
+## 5. Running the Streamlit Web Application
 
 Launch the interactive Streamlit interface from the repository root:
 
@@ -65,7 +85,7 @@ The application will open in your default browser at `http://localhost:8501`.
 
 ---
 
-## 5. Running the Test Suite
+## 6. Running the Test Suite
 
 Execute the unit test suite with `pytest`:
 
@@ -78,3 +98,4 @@ To run with verbose output:
 ```bash
 pytest -v
 ```
+

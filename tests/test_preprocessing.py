@@ -62,3 +62,26 @@ def test_preprocess_invalid_ndim_raises_value_error():
     """Verify passing 1D array raises ValueError."""
     with pytest.raises(ValueError, match="Unexpected image dimensions"):
         preprocess_image(np.zeros((10,)))
+
+
+def test_load_and_preprocess_image_from_disk(tmp_path):
+    """Verify load_and_preprocess_image reads from disk and outputs (90, 90, 1)."""
+    from src.data.preprocessing import load_and_preprocess_image
+
+    img_path = tmp_path / "sample.png"
+    img = Image.new("RGB", (128, 128), color=(200, 50, 50))
+    img.save(img_path)
+
+    tensor = load_and_preprocess_image(img_path, target_size=(90, 90))
+    assert tensor.shape == (90, 90, 1)
+    assert tensor.dtype == np.float32
+    assert 0.0 <= tensor.min() <= tensor.max() <= 1.0
+
+
+def test_load_and_preprocess_missing_file_raises_error():
+    """Verify missing file raises FileNotFoundError."""
+    from src.data.preprocessing import load_and_preprocess_image
+
+    with pytest.raises(FileNotFoundError):
+        load_and_preprocess_image("non_existent_file.png")
+
