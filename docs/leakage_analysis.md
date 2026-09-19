@@ -11,8 +11,8 @@ This document provides a technical post-mortem of the data leakage flaw present 
 In the original prototype notebook, the pipeline executed in the following order:
 
 ```text
-[ 253 Original Brain MRI Scans ]
- (98 "no", 155 "yes")
+[ 253 Raw Brain MRI Image Files ]
+ (98 "no" / No Tumor, 155 "yes" / Tumor)
          │
          ▼
 [ Step 1: Offline Disk Augmentation on ALL 253 Images ]
@@ -36,10 +36,10 @@ In the original prototype notebook, the pipeline executed in the following order
 
 When random sampling ($80/20$) is performed on a pool containing 60 to 120 synthetic variants of each base image:
 
-- For any given base patient image $I_k$, let its augmented variants be $V(I_k) = \{v_{k, 1}, v_{k, 2}, \dots, v_{k, M}\}$ where $M \in \{60, 120\}$.
+- For any given base image $I_k$, let its augmented variants be $V(I_k) = \{v_{k, 1}, v_{k, 2}, \dots, v_{k, M}\}$ where $M \in \{60, 120\}$.
 - The probability that **all** variants of $I_k$ fall strictly into the training split and none into the test split is:
   $$P(\text{No leakage for } I_k) = (0.80)^M \approx (0.80)^{60} \approx 1.53 \times 10^{-6}$$
-- Consequently, with $253$ base scans, **100% of test samples had identical or near-identical augmented twins in the training set**.
+- Consequently, with $253$ base images, **100% of test samples had identical or near-identical augmented twins in the training set**.
 - The resulting $99.03\%$ test accuracy did **not** measure clinical generalization or tumor feature abstraction; it merely measured the network's ability to recognize minor affine rotations and blurs of training images it had already memorized.
 
 ---
@@ -52,17 +52,17 @@ To establish a scientifically valid and defensible machine learning workflow, th
 
 ```text
 [ Raw Original Dataset ]
- (Unaugmented patient scans)
+ (Unaugmented original image files)
          │
          ▼
 [ Ingestion, Verification & SHA-256 Hashing ]
  - Validates file readability
  - Rejects corrupt/empty images
- - Flags exact duplicate files
+ - Filters exact duplicate files (25 identical files in raw Kaggle set)
          │
          ▼
 [ Stratified Train / Val / Test Partitioning ]
- - Executed on ORIGINAL images BEFORE any augmentation
+ - Executed on ORIGINAL unique images BEFORE any augmentation
  - Stratified by class: Train (70%), Val (15%), Test (15%)
          │
          ▼
@@ -90,19 +90,23 @@ To establish a scientifically valid and defensible machine learning workflow, th
 | Aspect | Original Prototype | Corrected Pipeline |
 | :--- | :--- | :--- |
 | **Augmentation Timing** | Offline (written to disk before split) | **Online (applied on-the-fly during training batches)** |
-| **Data Partitioning** | Random split on augmented pool (21,253 images) | **Stratified split on original images only (~253 images)** |
+| **Data Partitioning** | Random split on augmented pool (21,253 images) | **Stratified split on original unique images only (228 images)** |
 | **Disk Storage** | Generated 21,000+ files to disk | **Zero augmented files written to disk** |
-| **Evaluation Data** | Contaminated with training image twins | **100% unseen, unaugmented original scans** |
+| **Evaluation Data** | Contaminated with training image twins | **100% unseen, unaugmented original images** |
 | **Reproducibility** | Non-deterministic, unseeded OpenCV loops | **Deterministic random seed (`seed=42`)** |
 | **Safety Auditing** | None | **Automated SHA-256 hash and path disjointness assertions** |
 
 ---
 
-## 3. Dataset Constraints & Limitations
+## 3. Dataset Constraints & Critical Limitations
 
-1. **Exact vs. Perceptual Duplication:**  
-   The pipeline implements exact file matching via SHA-256 hashing. However, without clinical DICOM metadata (such as Patient ID, Series UID, Study Date), multiple slices originating from the same imaging volume cannot be programmatically grouped into patient clusters.
-2. **Experimental Nature of Augmentations:**  
-   The affine transformations (random flip, rotation, translation, zoom) are computer vision regularization techniques. They are **not** certified anatomical deformations.
-3. **No Retraining Claims in Stage 2:**  
-   In Stage 2, the pipeline infrastructure and splitting logic are established and verified. Retrained model performance will be evaluated on the uncompromised test set in Stage 3.
+1. **Exact vs. Patient-Level Duplication:**  
+   - The ingestion pipeline performs exact file deduplication via SHA-256 hashing, identifying and removing 25 byte-identical files present in the raw Kaggle dataset.
+   - **Crucial Limitation:** The public dataset lacks clinical DICOM headers, patient IDs, series instance UIDs, and acquisition dates. Therefore, **patient-level independence cannot be established from the available metadata**. Multiple 2D slices in the dataset may originate from the same patient scan volume.
+2. **Class Definitions:**  
+   - Label 0 = `No Tumor` (absence of apparent tumor abnormality in the axial slice).
+   - Label 1 = `Tumor` (presence of tumor abnormality).
+   - The negative class is designated `No Tumor` rather than "healthy", as non-tumor scans may contain other non-neoplastic neurological conditions or artifacts.
+3. **Experimental Nature of Augmentations:**  
+   The affine transformations (random flip, rotation, translation, zoom) are standard computer vision regularization techniques to reduce empirical risk. They are **not** certified anatomical deformations.
+

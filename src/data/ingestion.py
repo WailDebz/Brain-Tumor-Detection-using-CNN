@@ -10,6 +10,7 @@ from PIL import Image
 from src.config import (
     CLASS_TO_LABEL,
     LABEL_TO_CLASS,
+    PROJECT_ROOT,
     RAW_DATA_DIR,
     SUPPORTED_IMAGE_EXTENSIONS,
 )
@@ -167,11 +168,17 @@ def scan_and_ingest_data(
                 continue
             seen_hashes[file_hash] = str(file_path)
 
+            # Store repository-relative portable POSIX path
+            try:
+                portable_filepath = file_path.relative_to(PROJECT_ROOT).as_posix()
+            except ValueError:
+                portable_filepath = file_path.relative_to(target_dir).as_posix()
+
             width, height, mode = meta if meta is not None else (0, 0, "unknown")
             records.append(
                 {
-                    "filepath": str(file_path.resolve()),
-                    "relative_path": str(file_path.relative_to(target_dir)),
+                    "filepath": portable_filepath,
+                    "relative_path": file_path.relative_to(target_dir).as_posix(),
                     "filename": file_path.name,
                     "class_name": canonical_class,
                     "label_name": label_display,

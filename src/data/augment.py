@@ -15,7 +15,7 @@ def build_augmentation_layer(
        No synthetic or augmented images are written to disk.
     2. Training-Only Constraint: This augmentation layer must ONLY be attached to the
        training pipeline. Validation and Test pipelines MUST evaluate exclusively on
-       unaltered, deterministic patient scans.
+       unaltered, deterministic original images.
     3. Experimental Notice: These affine and spatial transformations are standard computer
        vision regularization techniques and are NOT certified or clinically validated
        anatomical deformations.

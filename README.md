@@ -96,7 +96,7 @@ The baseline pipeline employs a 2D Convolutional Neural Network:
 ## Evaluation
 
 > **Methodological Audit Note:**  
-> The originally reported 99% accuracy in the archived notebook is **not** considered a reliable generalization benchmark. The original prototype applied offline data augmentation to the dataset *prior* to performing the train/test split, resulting in identical base patient scans existing across both training and evaluation sets (data leakage).
+> The originally reported 99% accuracy in the archived notebook is **not** considered a reliable generalization benchmark. The original prototype applied offline data augmentation to the dataset *prior* to performing the train/test split, resulting in duplicate augmented variants of identical base images existing across both training and evaluation sets (data leakage). Additionally, exact SHA-256 duplicate removal was not performed on the raw image collection.
 >
 > In the upcoming implementation stage, the model will be retrained on a strictly leak-free, stratified train/validation/test split with online augmentation, and evaluated on comprehensive medical metrics (Sensitivity, Specificity, F1-Score, and ROC-AUC). Revised benchmarks will be reported here once retraining is completed.
 

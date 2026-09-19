@@ -115,6 +115,11 @@ def test_scan_and_ingest_data(synthetic_dataset_dir: Path):
     expected_cols = {"filepath", "filename", "class_name", "label", "file_hash", "width", "height"}
     assert expected_cols.issubset(set(df.columns))
 
+    # Verify paths are relative/portable without backslashes
+    for p in df["filepath"]:
+        assert "\\" not in p
+        assert not p.startswith("C:")
+
 
 def test_scan_missing_dir_raises_error(tmp_path: Path):
     """Verify scanning a non-existent directory raises FileNotFoundError."""

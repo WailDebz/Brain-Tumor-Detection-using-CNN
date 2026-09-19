@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from src.config import DEFAULT_BATCH_SIZE, DEFAULT_IMAGE_SIZE, RANDOM_SEED
+from src.config import DEFAULT_BATCH_SIZE, DEFAULT_IMAGE_SIZE, PROJECT_ROOT, RANDOM_SEED
 from src.data.augment import build_augmentation_layer
 from src.data.ingestion import load_manifest
 
@@ -76,7 +76,15 @@ def build_tf_dataset(
     else:
         df = manifest.copy()
 
-    filepaths = df["filepath"].astype(str).values
+    def _resolve_to_filesystem_path(p: str) -> str:
+        path_obj = Path(p)
+        if not path_obj.is_absolute() and not path_obj.exists():
+            candidate = PROJECT_ROOT / path_obj
+            if candidate.exists():
+                return str(candidate.resolve())
+        return str(path_obj.resolve())
+
+    filepaths = [_resolve_to_filesystem_path(p) for p in df["filepath"].astype(str).values]
     labels = df["label"].astype(np.float32).values
 
     # Determine whether augmentation is applied

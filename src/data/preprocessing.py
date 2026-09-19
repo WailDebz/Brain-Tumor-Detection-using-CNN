@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from src.config import DEFAULT_IMAGE_SIZE
+from src.config import DEFAULT_IMAGE_SIZE, PROJECT_ROOT
 
 
 def preprocess_image_array(
@@ -91,6 +91,11 @@ def load_and_preprocess_image(
         ValueError: If image file is corrupt or unreadable.
     """
     path = Path(file_path)
+    if not path.is_absolute() and not path.exists():
+        candidate = PROJECT_ROOT / path
+        if candidate.exists():
+            path = candidate
+
     if not path.exists():
         raise FileNotFoundError(f"Image file not found: {path.resolve()}")
 

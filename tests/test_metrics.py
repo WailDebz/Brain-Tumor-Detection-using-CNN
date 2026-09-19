@@ -50,7 +50,7 @@ def test_hand_crafted_perfect_classification():
 
 def test_hand_crafted_mixed_classification():
     """Verify metrics on a known 8-sample mixture with 2 FP and 1 FN."""
-    # 4 healthy (0), 4 tumors (1)
+    # 4 No Tumor (0), 4 Tumor (1)
     y_true = np.array([0, 0, 0, 0, 1, 1, 1, 1])
     y_prob = np.array([0.1, 0.2, 0.6, 0.8, 0.3, 0.7, 0.85, 0.9])
     # At threshold 0.5:

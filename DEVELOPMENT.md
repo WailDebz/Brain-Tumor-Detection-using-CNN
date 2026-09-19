@@ -55,21 +55,25 @@ pip install -e ".[dev]"
 
 ## 4. Dataset Preparation & Leak-Free Splitting
 
-To prepare, validate, deduplicate, and split a local dataset:
+To prepare, validate, deduplicate, and partition the dataset using the repository's deterministic pipeline:
 
-1. Place your raw brain MRI scan images into `data/raw/no/` and `data/raw/yes/`.
-2. Run the dataset preparation and validation script:
-
-```bash
-python scripts/prepare_data.py --data-dir data/raw --output-dir data/processed
-```
-
-This CLI utility will:
-- Validate each image file and filter corrupt or empty files.
-- Compute SHA-256 hashes to detect and prevent duplicate sample leakage.
-- Generate stratified Train (70%), Validation (15%), and Test (15%) splits on original scans.
-- Assert zero sample or hash overlap across partitions.
-- Output split manifest CSVs into `data/processed/`.
+1. **Obtain the dataset:** Acquire the Brain MRI image dataset (e.g., from the public Kaggle repository *Brain MRI Images for Brain Tumor Detection*).
+2. **Place original files:** Place raw image files under `data/raw/no/` (No Tumor, label 0) and `data/raw/yes/` (Tumor, label 1). Raw images are gitignored and must never be committed.
+3. **Execute the preparation CLI:**
+   ```bash
+   python scripts/prepare_data.py --data-dir data/raw --output-dir data/processed
+   ```
+4. **Automated processing performed by CLI:**
+   - Case-insensitively scans and validates all image files (`.jpg`, `.jpeg`, `.png`), rejecting unreadable or corrupt files.
+   - Computes SHA-256 hashes to detect and filter exact byte-identical duplicate files within the raw dataset.
+   - Performs stratified Train ($70\%$), Validation ($15\%$), and Test ($15\%$) partitioning on unique original images using a fixed random seed (`seed=42`).
+   - Programmatically asserts zero sample path and zero hash overlap across all three partitions.
+   - Generates portable, repository-relative manifest CSVs saved to `data/processed/`:
+     - `data/processed/train_manifest.csv`
+     - `data/processed/val_manifest.csv`
+     - `data/processed/test_manifest.csv`
+     - `data/processed/full_split_manifest.csv`
+5. **No offline augmentation:** The preparation process does **not** create or save augmented images to disk. Online data augmentation is applied exclusively in-memory to training mini-batches during model training.
 
 ---
 

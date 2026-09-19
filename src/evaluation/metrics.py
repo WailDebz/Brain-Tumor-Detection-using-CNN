@@ -159,7 +159,7 @@ def calculate_specificity(tn: int, fp: int) -> float:
     """Compute Specificity (also known as True Negative Rate).
 
     Formula: Specificity = TN / (TN + FP)
-    Measures the proportion of healthy/non-tumor scans correctly identified.
+    Measures the proportion of No Tumor (label 0) scans correctly identified.
 
     Args:
         tn: True negative count.
