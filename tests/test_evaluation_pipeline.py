@@ -1,6 +1,7 @@
 """Unit tests for evaluation pipeline, diagnostic plotting, and threshold tuning."""
 
 from pathlib import Path
+from typing import Tuple
 import numpy as np
 import pandas as pd
 from PIL import Image

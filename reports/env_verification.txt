@@ -1,0 +1,16 @@
+Python Executable: C:\Users\waild\Brain-Tumor-Detection-using-CNN\.venv\Scripts\python.exe
+Python Version: 3.13.0 (tags/v3.13.0:60403a5, Oct  7 2024, 09:38:07) [MSC v.1941 64 bit (AMD64)]
+NumPy Version: 2.5.3
+OpenCV Version: 5.0.0
+Pillow Version: 12.3.0
+Scikit-Learn Version: 1.9.1
+Matplotlib Version: 3.11.2
+Streamlit Version: 1.64.0
+Pytest Version: 9.1.1
+TensorFlow Version: 2.21.0
+Keras Version: 3.15.1
+Physical Devices: [PhysicalDevice(name='/physical_device:CPU:0', device_type='CPU')]
+
+--- Model Verification ---
+Corrected CNN model instantiated successfully. Name: brain_tumor_baseline_cnn, Params: 101889
+Historical model loaded successfully from models\brain_tumor_detector.keras. Name: sequential_3, Params: 1420033

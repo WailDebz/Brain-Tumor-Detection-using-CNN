@@ -168,11 +168,11 @@ def scan_and_ingest_data(
                 continue
             seen_hashes[file_hash] = str(file_path)
 
-            # Store repository-relative portable POSIX path
+            # Store repository-relative portable POSIX path if inside project, else POSIX absolute
             try:
-                portable_filepath = file_path.relative_to(PROJECT_ROOT).as_posix()
+                portable_filepath = file_path.resolve().relative_to(PROJECT_ROOT).as_posix()
             except ValueError:
-                portable_filepath = file_path.relative_to(target_dir).as_posix()
+                portable_filepath = file_path.resolve().as_posix()
 
             width, height, mode = meta if meta is not None else (0, 0, "unknown")
             records.append(

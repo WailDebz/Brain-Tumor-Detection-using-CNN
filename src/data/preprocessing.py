@@ -59,7 +59,7 @@ def preprocess_image_array(
     elif np_image.ndim == 2:
         gray = np_image
     else:
-        raise ValueError(f"Unexpected array dimensionality: {np_image.ndim}D.")
+        raise ValueError(f"Unexpected image dimensions: {np_image.ndim}D array.")
 
     # Resize to target (width, height)
     target_w, target_h = target_size
@@ -119,10 +119,25 @@ def preprocess_for_inference(
     Returns:
         Preprocessed tensor of shape (1, height, width, 1) with dtype float32.
     """
-    if isinstance(image, (str, Path)):
+    if isinstance(image, Path):
         tensor_hwc = load_and_preprocess_image(image, target_size=target_size)
-    else:
+    elif isinstance(image, str):
+        # Check if string is a valid existing path; if not, raise ValueError
+        path_candidate = Path(image)
+        if path_candidate.exists() or (PROJECT_ROOT / path_candidate).exists():
+            tensor_hwc = load_and_preprocess_image(path_candidate, target_size=target_size)
+        else:
+            raise ValueError(
+                f"Unsupported image type or path not found: {image}. "
+                "Expected PIL.Image.Image, np.ndarray, or a valid image file path."
+            )
+    elif isinstance(image, (Image.Image, np.ndarray)):
         tensor_hwc = preprocess_image_array(image, target_size=target_size)
+    else:
+        raise ValueError(
+            f"Unsupported image type: {type(image)}. "
+            "Expected PIL.Image.Image, np.ndarray, or Path."
+        )
 
     # Add batch dimension: (1, height, width, 1)
     batched = np.expand_dims(tensor_hwc, axis=0)

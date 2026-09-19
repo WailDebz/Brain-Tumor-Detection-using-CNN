@@ -34,9 +34,8 @@ def test_cnn_parameter_efficiency():
     model = build_cnn_model(input_shape=(90, 90, 1))
     total_params = model.count_params()
 
-    # The modernized baseline should be ~100k params, strictly under 250k
-    assert total_params < 250_000, f"Expected <250k parameters, got {total_params}"
-    assert total_params > 50_000, f"Expected >50k parameters, got {total_params}"
+    # The modernized baseline has exactly 101,889 parameters (~102k params vs ~1.42M params)
+    assert total_params == 101889, f"Expected 101889 parameters, got {total_params}"
 
 
 def test_cnn_forward_pass_and_output_bounds():

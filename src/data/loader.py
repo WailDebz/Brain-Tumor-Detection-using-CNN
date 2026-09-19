@@ -78,10 +78,13 @@ def build_tf_dataset(
 
     def _resolve_to_filesystem_path(p: str) -> str:
         path_obj = Path(p)
-        if not path_obj.is_absolute() and not path_obj.exists():
-            candidate = PROJECT_ROOT / path_obj
-            if candidate.exists():
-                return str(candidate.resolve())
+        if path_obj.is_absolute():
+            return str(path_obj)
+        if path_obj.exists():
+            return str(path_obj.resolve())
+        candidate = PROJECT_ROOT / path_obj
+        if candidate.exists():
+            return str(candidate.resolve())
         return str(path_obj.resolve())
 
     filepaths = [_resolve_to_filesystem_path(p) for p in df["filepath"].astype(str).values]

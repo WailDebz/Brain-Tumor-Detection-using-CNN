@@ -119,3 +119,46 @@ def test_save_splits_to_disk(synthetic_manifest_df: pd.DataFrame, tmp_path: Path
         assert paths[split_key].exists()
         loaded = pd.read_csv(paths[split_key])
         assert len(loaded) > 0
+
+
+def test_stratified_split_on_exact_cohort_distribution():
+    """Verify split counts and class stratification on the exact 228-sample cohort (87 no, 141 yes)."""
+    records = []
+    for i in range(87):
+        records.append({
+            "filepath": f"data/raw/no/no_{i}.jpg",
+            "filename": f"no_{i}.jpg",
+            "class_name": "no",
+            "label": 0,
+            "file_hash": f"hash_no_{i}",
+        })
+    for i in range(141):
+        records.append({
+            "filepath": f"data/raw/yes/yes_{i}.jpg",
+            "filename": f"yes_{i}.jpg",
+            "class_name": "yes",
+            "label": 1,
+            "file_hash": f"hash_yes_{i}",
+        })
+
+    cohort_df = pd.DataFrame(records)
+    train_df, val_df, test_df, report = create_stratified_splits(cohort_df, split_ratios=(0.70, 0.15, 0.15), seed=42)
+
+    # Verify authoritative split counts
+    assert len(train_df) == 159
+    assert len(val_df) == 34
+    assert len(test_df) == 35
+    assert len(train_df) + len(val_df) + len(test_df) == 228
+
+    # Verify exact class counts
+    assert (train_df["label"] == 0).sum() == 61
+    assert (train_df["label"] == 1).sum() == 98
+
+    assert (val_df["label"] == 0).sum() == 13
+    assert (val_df["label"] == 1).sum() == 21
+
+    assert (test_df["label"] == 0).sum() == 13
+    assert (test_df["label"] == 1).sum() == 22
+
+    assert report.is_leak_free is True
+

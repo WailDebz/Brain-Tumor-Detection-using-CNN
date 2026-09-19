@@ -26,14 +26,14 @@
       "test": 0.15
     },
     "partition_counts": {
-      "train": 160,
+      "train": 159,
       "val": 34,
-      "test": 34
+      "test": 35
     },
     "partition_class_distribution": {
       "train": {
         "no": 61,
-        "yes": 99
+        "yes": 98
       },
       "val": {
         "no": 13,
@@ -41,7 +41,7 @@
       },
       "test": {
         "no": 13,
-        "yes": 21
+        "yes": 22
       }
     },
     "leakage_audit": {
@@ -80,7 +80,9 @@
       {"dropout_rate": 0.3},
       {"units": 1, "activation": "sigmoid"}
     ],
-    "total_trainable_parameters": 102401
+    "total_parameters": 101889,
+    "trainable_parameters": 101441,
+    "non_trainable_parameters": 448
   },
   "hyperparameters": {
     "optimizer": "Adam",

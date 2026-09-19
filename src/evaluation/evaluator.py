@@ -74,16 +74,7 @@ def evaluate_model_on_manifest(
     """
     import tensorflow as tf
 
-    # Step 1: Load model if a path is provided
-    if isinstance(model, (str, Path)):
-        model_path = Path(model)
-        if not model_path.exists():
-            raise FileNotFoundError(f"Model artifact not found at: {model_path.resolve()}")
-        loaded_model = tf.keras.models.load_model(str(model_path))
-    else:
-        loaded_model = model
-
-    # Step 2: Load and validate manifest
+    # Step 1: Load and validate manifest
     if isinstance(manifest, (str, Path)):
         manifest_path = Path(manifest)
         if not manifest_path.exists():
@@ -102,6 +93,15 @@ def evaluate_model_on_manifest(
     if df_eval["filepath"].duplicated().any():
         dup_count = df_eval["filepath"].duplicated().sum()
         raise ValueError(f"Evaluation manifest contains {dup_count} duplicate file paths.")
+
+    # Step 2: Load model if a path is provided
+    if isinstance(model, (str, Path)):
+        model_path = Path(model)
+        if not model_path.exists():
+            raise FileNotFoundError(f"Model artifact not found at: {model_path.resolve()}")
+        loaded_model = tf.keras.models.load_model(str(model_path))
+    else:
+        loaded_model = model
 
     # Step 3: Build deterministic, unaugmented tf.data.Dataset
     eval_ds = build_tf_dataset(
