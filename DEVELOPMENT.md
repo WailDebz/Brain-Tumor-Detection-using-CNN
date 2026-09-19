@@ -91,7 +91,39 @@ This training pipeline will:
 
 ---
 
-## 6. Running the Streamlit Web Application
+## 6. Held-Out Test Set Evaluation
+
+To evaluate a trained model on the held-out test split with the default fixed threshold ($0.5$):
+
+```bash
+python scripts/evaluate.py \
+    --model-path models/brain_tumor_cnn_baseline.keras \
+    --test-manifest data/processed/test_manifest.csv
+```
+
+To evaluate using validation-based threshold optimization (optimizing Youden's J statistic on the validation partition, then freezing it for test evaluation):
+
+```bash
+python scripts/evaluate.py \
+    --model-path models/brain_tumor_cnn_baseline.keras \
+    --test-manifest data/processed/test_manifest.csv \
+    --val-manifest data/processed/val_manifest.csv \
+    --tune-threshold \
+    --tuning-metric youden_j
+```
+
+This evaluation pipeline will:
+- Run deterministic, unaugmented inference on the pristine test partition.
+- Calculate clinical metrics: Accuracy, Sensitivity (Recall), Specificity, Precision, F1-Score, ROC-AUC, and PR-AUC.
+- Export machine-readable metrics to `reports/metrics/test_metrics_baseline.json` and `test_metrics_baseline.csv`.
+- Generate annotated medical diagnostic plots in `reports/figures/`:
+  - Confusion Matrix (`reports/figures/confusion_matrix_test.png`)
+  - ROC Curve (`reports/figures/roc_curve_test.png`)
+  - Precision-Recall Curve (`reports/figures/pr_curve_test.png`)
+
+---
+
+## 7. Running the Streamlit Web Application
 
 Launch the interactive Streamlit interface from the repository root:
 
@@ -103,7 +135,7 @@ The application will open in your default browser at `http://localhost:8501`.
 
 ---
 
-## 7. Running the Test Suite
+## 8. Running the Test Suite
 
 Execute the unit test suite with `pytest`:
 

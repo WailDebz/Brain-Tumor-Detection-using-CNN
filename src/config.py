@@ -60,4 +60,14 @@ DEFAULT_HISTORY_JSON_PATH: Final[Path] = REPORTS_METRICS_DIR / "training_history
 DEFAULT_HISTORY_CSV_PATH: Final[Path] = REPORTS_METRICS_DIR / "training_history_baseline.csv"
 DEFAULT_TRAINING_CURVES_PATH: Final[Path] = REPORTS_FIGURES_DIR / "training_curves_baseline.png"
 
+# Default evaluation paths
+DEFAULT_TEST_MANIFEST_PATH: Final[Path] = PROCESSED_DATA_DIR / "test_manifest.csv"
+DEFAULT_VAL_MANIFEST_PATH: Final[Path] = PROCESSED_DATA_DIR / "val_manifest.csv"
+DEFAULT_TEST_METRICS_JSON_PATH: Final[Path] = REPORTS_METRICS_DIR / "test_metrics_baseline.json"
+DEFAULT_TEST_METRICS_CSV_PATH: Final[Path] = REPORTS_METRICS_DIR / "test_metrics_baseline.csv"
+DEFAULT_CONFUSION_MATRIX_PATH: Final[Path] = REPORTS_FIGURES_DIR / "confusion_matrix_test.png"
+DEFAULT_ROC_CURVE_PATH: Final[Path] = REPORTS_FIGURES_DIR / "roc_curve_test.png"
+DEFAULT_PR_CURVE_PATH: Final[Path] = REPORTS_FIGURES_DIR / "pr_curve_test.png"
+
+
 
