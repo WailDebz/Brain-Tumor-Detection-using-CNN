@@ -1,0 +1,20 @@
+{
+  "model_name": "brain_tumor_cnn_baseline",
+  "dataset_split": "test",
+  "threshold": 0.6274,
+  "threshold_strategy": "validation_tuned_youden_j",
+  "total_samples": 35,
+  "positive_samples": 22,
+  "negative_samples": 13,
+  "tp": 20,
+  "tn": 7,
+  "fp": 6,
+  "fn": 2,
+  "accuracy": 0.7714285714285715,
+  "precision": 0.7692307692307693,
+  "sensitivity": 0.9090909090909091,
+  "specificity": 0.5384615384615384,
+  "f1_score": 0.8333333333333333,
+  "roc_auc": 0.7902097902097901,
+  "average_precision": 0.8089392602655179
+}

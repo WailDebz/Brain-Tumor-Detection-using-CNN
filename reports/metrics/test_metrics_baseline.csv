@@ -1,0 +1,2 @@
+model_name,dataset_split,threshold,threshold_strategy,total_samples,positive_samples,negative_samples,tp,tn,fp,fn,accuracy,precision,sensitivity,specificity,f1_score,roc_auc,average_precision
+brain_tumor_cnn_baseline,test,0.5,fixed_default_0.5,35,22,13,22,0,13,0,0.6285714285714286,0.6285714285714286,1.0,0.0,0.7719298245614035,0.7902097902097901,0.8089392602655179

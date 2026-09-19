@@ -1,0 +1,2 @@
+model_name,dataset_split,threshold,threshold_strategy,total_samples,positive_samples,negative_samples,tp,tn,fp,fn,accuracy,precision,sensitivity,specificity,f1_score,roc_auc,average_precision
+brain_tumor_cnn_baseline,test,0.6274,validation_tuned_youden_j,35,22,13,20,7,6,2,0.7714285714285715,0.7692307692307693,0.9090909090909091,0.5384615384615384,0.8333333333333333,0.7902097902097901,0.8089392602655179

@@ -1,0 +1,20 @@
+{
+  "model_name": "brain_tumor_cnn_baseline",
+  "dataset_split": "test",
+  "threshold": 0.5,
+  "threshold_strategy": "fixed_default_0.5",
+  "total_samples": 35,
+  "positive_samples": 22,
+  "negative_samples": 13,
+  "tp": 22,
+  "tn": 0,
+  "fp": 13,
+  "fn": 0,
+  "accuracy": 0.6285714285714286,
+  "precision": 0.6285714285714286,
+  "sensitivity": 1.0,
+  "specificity": 0.0,
+  "f1_score": 0.7719298245614035,
+  "roc_auc": 0.7902097902097901,
+  "average_precision": 0.8089392602655179
+}
