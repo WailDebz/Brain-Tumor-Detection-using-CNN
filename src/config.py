@@ -13,9 +13,14 @@ RAW_DATA_DIR: Final[Path] = DATA_DIR / "raw"
 PROCESSED_DATA_DIR: Final[Path] = DATA_DIR / "processed"
 DOCS_DIR: Final[Path] = PROJECT_ROOT / "docs"
 APP_DIR: Final[Path] = PROJECT_ROOT / "app"
+REPORTS_DIR: Final[Path] = PROJECT_ROOT / "reports"
+REPORTS_FIGURES_DIR: Final[Path] = REPORTS_DIR / "figures"
+REPORTS_METRICS_DIR: Final[Path] = REPORTS_DIR / "metrics"
 
-# Default model artifact path
-DEFAULT_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_detector.keras"
+# Model artifact paths
+ORIGINAL_LEAKED_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_detector.keras"
+BASELINE_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_cnn_baseline.keras"
+DEFAULT_MODEL_PATH: Final[Path] = ORIGINAL_LEAKED_MODEL_PATH  # Maintained for app until new model evaluated
 
 # Image processing specifications
 DEFAULT_IMAGE_SIZE: Final[Tuple[int, int]] = (90, 90)
@@ -37,6 +42,22 @@ RANDOM_SEED: Final[int] = 42
 # adequate unseen sample volume for statistically meaningful evaluation metrics.
 DEFAULT_SPLIT_RATIOS: Final[Tuple[float, float, float]] = (0.70, 0.15, 0.15)
 
-# DataLoader defaults
+# DataLoader & Training defaults
 DEFAULT_BATCH_SIZE: Final[int] = 32
+DEFAULT_EPOCHS: Final[int] = 30
+DEFAULT_LEARNING_RATE: Final[float] = 1e-3
+DEFAULT_L2_REGULARIZATION: Final[float] = 1e-4
+DEFAULT_DROPOUT_RATE: Final[float] = 0.3
+
+# Training Callbacks configuration
+DEFAULT_EARLY_STOPPING_PATIENCE: Final[int] = 8
+DEFAULT_REDUCE_LR_PATIENCE: Final[int] = 4
+DEFAULT_REDUCE_LR_FACTOR: Final[float] = 0.5
+DEFAULT_MIN_LR: Final[float] = 1e-6
+
+# Default output reporting paths
+DEFAULT_HISTORY_JSON_PATH: Final[Path] = REPORTS_METRICS_DIR / "training_history_baseline.json"
+DEFAULT_HISTORY_CSV_PATH: Final[Path] = REPORTS_METRICS_DIR / "training_history_baseline.csv"
+DEFAULT_TRAINING_CURVES_PATH: Final[Path] = REPORTS_FIGURES_DIR / "training_curves_baseline.png"
+
 

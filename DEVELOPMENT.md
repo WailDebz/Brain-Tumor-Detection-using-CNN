@@ -73,7 +73,25 @@ This CLI utility will:
 
 ---
 
-## 5. Running the Streamlit Web Application
+## 5. Training the Corrected Baseline CNN Model
+
+To train the modernized baseline CNN on the leak-free dataset partitions:
+
+```bash
+python scripts/train.py --data-dir data/raw --epochs 30 --batch-size 32
+```
+
+This training pipeline will:
+- Partition the dataset using the leak-free stratified split ($70\%$ train, $15\%$ val, $15\%$ test).
+- Apply online data augmentation strictly to the training dataset.
+- Train the modernized CNN architecture with `EarlyStopping`, `ReduceLROnPlateau`, and `ModelCheckpoint`.
+- Monitor validation loss (the held-out test partition is never accessed during training).
+- Save the best model artifact to `models/brain_tumor_cnn_baseline.keras`.
+- Export training history to `reports/metrics/training_history_baseline.json` and loss/accuracy curves to `reports/figures/training_curves_baseline.png`.
+
+---
+
+## 6. Running the Streamlit Web Application
 
 Launch the interactive Streamlit interface from the repository root:
 
@@ -85,7 +103,7 @@ The application will open in your default browser at `http://localhost:8501`.
 
 ---
 
-## 6. Running the Test Suite
+## 7. Running the Test Suite
 
 Execute the unit test suite with `pytest`:
 
@@ -98,4 +116,5 @@ To run with verbose output:
 ```bash
 pytest -v
 ```
+
 
