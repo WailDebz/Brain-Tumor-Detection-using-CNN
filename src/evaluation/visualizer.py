@@ -266,18 +266,23 @@ def generate_all_evaluation_figures(
     y_prob: np.ndarray,
     y_pred: np.ndarray,
     figures_dir: Union[str, Path] = REPORTS_FIGURES_DIR,
-    model_name: str = "Baseline CNN",
+    model_name: str = "brain_tumor_baseline_cnn",
     split_name: str = "Test",
 ) -> Dict[str, Path]:
-    """Generate and save all diagnostic evaluation plots.
+    """Generate and save all diagnostic evaluation plots with model-specific filenames.
+
+    Naming convention:
+      - {figures_dir}/confusion_matrix_{split}_{model_slug}.png
+      - {figures_dir}/roc_curve_{split}_{model_slug}.png
+      - {figures_dir}/pr_curve_{split}_{model_slug}.png
 
     Args:
         y_true: Ground truth labels (0 or 1).
         y_prob: Continuous predicted probabilities in [0.0, 1.0].
         y_pred: Binary predictions (0 or 1).
         figures_dir: Destination directory for figures.
-        model_name: Model identifier string.
-        split_name: Split partition name.
+        model_name: Model identifier string (used to generate unique filenames).
+        split_name: Split partition name ('Test', 'Val', etc.).
 
     Returns:
         Dictionary mapping figure names ('confusion_matrix', 'roc_curve', 'pr_curve') to saved Paths.
@@ -285,9 +290,10 @@ def generate_all_evaluation_figures(
     fig_dir = Path(figures_dir)
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    cm_path = fig_dir / f"confusion_matrix_{split_name.lower()}.png"
-    roc_path = fig_dir / f"roc_curve_{split_name.lower()}.png"
-    pr_path = fig_dir / f"pr_curve_{split_name.lower()}.png"
+    model_slug = model_name.lower().strip().replace(" ", "_").replace("-", "_")
+    cm_path = fig_dir / f"confusion_matrix_{split_name.lower()}_{model_slug}.png"
+    roc_path = fig_dir / f"roc_curve_{split_name.lower()}_{model_slug}.png"
+    pr_path = fig_dir / f"pr_curve_{split_name.lower()}_{model_slug}.png"
 
     paths = {
         "confusion_matrix": plot_confusion_matrix(

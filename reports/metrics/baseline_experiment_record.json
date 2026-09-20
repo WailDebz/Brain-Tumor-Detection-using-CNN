@@ -106,10 +106,11 @@
     "history_csv": "reports/metrics/training_history_baseline.csv",
     "training_curves_plot": "reports/figures/training_curves_baseline.png",
     "test_metrics_json": "reports/metrics/test_metrics_baseline.json",
-    "confusion_matrix_plot": "reports/figures/confusion_matrix_test.png",
-    "roc_curve_plot": "reports/figures/roc_curve_test.png",
-    "pr_curve_plot": "reports/figures/pr_curve_test.png"
+    "confusion_matrix_plot": "reports/figures/confusion_matrix_test_brain_tumor_cnn_baseline.png",
+    "roc_curve_plot": "reports/figures/roc_curve_test_brain_tumor_cnn_baseline.png",
+    "pr_curve_plot": "reports/figures/pr_curve_test_brain_tumor_cnn_baseline.png"
   },
+  "test_set_usage_disclosure": "The held-out 35-image split was used as an exploratory benchmark for comparing the corrected custom CNN and MobileNetV2 feature-extraction models. Because architecture comparison was informed by this benchmark, these results should not be interpreted as an untouched final estimate of generalization. Future model development and selection decisions must rely exclusively on training/validation procedures, and the test split must not be used for hyperparameter selection or iterative tuning.",
   "execution_environment": {
     "python_version": "3.13.0",
     "tensorflow_version": "2.21.0",

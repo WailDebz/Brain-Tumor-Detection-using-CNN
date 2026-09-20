@@ -31,6 +31,7 @@ from src.data.ingestion import scan_and_ingest_data
 from src.data.loader import build_tf_dataset
 from src.data.split import SplitReport, create_stratified_splits, verify_split_leak_safety
 from src.models.cnn import build_cnn_model
+from src.models.transfer import build_transfer_model
 from src.utils.reproducibility import set_random_seeds
 
 
@@ -123,6 +124,7 @@ def plot_and_save_training_curves(
 
 def train_baseline_model(
     data_source: Union[str, Path, Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]] = RAW_DATA_DIR,
+    model_type: str = "cnn",
     model_output_path: Path = BASELINE_MODEL_PATH,
     history_json_path: Path = DEFAULT_HISTORY_JSON_PATH,
     history_csv_path: Path = DEFAULT_HISTORY_CSV_PATH,
@@ -232,14 +234,25 @@ def train_baseline_model(
         seed=seed,
     )
 
-    # Step 4: Build Modernized Baseline CNN
+    # Step 4: Build Model Architecture (Custom CNN or Transfer Learning)
     input_shape = (DEFAULT_IMAGE_SIZE[1], DEFAULT_IMAGE_SIZE[0], NUM_CHANNELS)
-    model = build_cnn_model(
-        input_shape=input_shape,
-        learning_rate=learning_rate,
-        l2_reg=l2_reg,
-        dropout_rate=dropout_rate,
-    )
+    if model_type.lower() in {"transfer", "transfer_mobilenetv2", "mobilenetv2"}:
+        model = build_transfer_model(
+            input_shape=input_shape,
+            learning_rate=learning_rate,
+            l2_reg=l2_reg,
+            dropout_rate=dropout_rate,
+            fine_tune=False,
+            name="brain_tumor_transfer_mobilenetv2",
+        )
+    else:
+        model = build_cnn_model(
+            input_shape=input_shape,
+            learning_rate=learning_rate,
+            l2_reg=l2_reg,
+            dropout_rate=dropout_rate,
+            name="brain_tumor_baseline_cnn",
+        )
 
     if verbose > 0:
         model.summary()

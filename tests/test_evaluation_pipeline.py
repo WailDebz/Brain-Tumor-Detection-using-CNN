@@ -73,6 +73,7 @@ def test_visualizer_figure_generation(tmp_path: Path):
     for name, p in fig_paths.items():
         assert p.exists()
         assert p.stat().st_size > 0
+        assert "test_baseline" in p.name
 
 
 def test_evaluate_model_on_manifest_with_mock_model(

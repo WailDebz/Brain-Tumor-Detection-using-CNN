@@ -1,0 +1,20 @@
+{
+  "model_name": "brain_tumor_mobilenetv2_frozen",
+  "dataset_split": "test",
+  "threshold": 0.8331999999999999,
+  "threshold_strategy": "validation_tuned_youden_j",
+  "total_samples": 35,
+  "positive_samples": 22,
+  "negative_samples": 13,
+  "tp": 16,
+  "tn": 13,
+  "fp": 0,
+  "fn": 6,
+  "accuracy": 0.8285714285714286,
+  "precision": 1.0,
+  "sensitivity": 0.7272727272727273,
+  "specificity": 1.0,
+  "f1_score": 0.8421052631578948,
+  "roc_auc": 0.9230769230769231,
+  "average_precision": 0.9656565656565655
+}

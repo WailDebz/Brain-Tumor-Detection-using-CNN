@@ -22,8 +22,12 @@ from src.config import (
     DEFAULT_REDUCE_LR_FACTOR,
     DEFAULT_REDUCE_LR_PATIENCE,
     DEFAULT_TRAINING_CURVES_PATH,
+    DEFAULT_TRANSFER_HISTORY_CSV_PATH,
+    DEFAULT_TRANSFER_HISTORY_JSON_PATH,
+    DEFAULT_TRANSFER_TRAINING_CURVES_PATH,
     RANDOM_SEED,
     RAW_DATA_DIR,
+    TRANSFER_MODEL_PATH,
 )
 from src.training.trainer import train_baseline_model
 
@@ -31,7 +35,14 @@ from src.training.trainer import train_baseline_model
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments for baseline model training."""
     parser = argparse.ArgumentParser(
-        description="Train the modernized baseline CNN on a leak-free, stratified brain MRI dataset."
+        description="Train the modernized baseline CNN or transfer learning model on a leak-free brain MRI dataset."
+    )
+    parser.add_argument(
+        "--model-type",
+        type=str,
+        default="cnn",
+        choices=["cnn", "transfer_mobilenetv2", "transfer"],
+        help="Architecture type: 'cnn' (custom baseline) or 'transfer_mobilenetv2' (frozen MobileNetV2). Default: cnn",
     )
     parser.add_argument(
         "--data-dir",
@@ -42,26 +53,26 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model-output",
         type=Path,
-        default=BASELINE_MODEL_PATH,
-        help=f"Path to save the best trained .keras model artifact. Default: {BASELINE_MODEL_PATH}",
+        default=None,
+        help=f"Path to save the best trained .keras model artifact.",
     )
     parser.add_argument(
         "--history-json",
         type=Path,
-        default=DEFAULT_HISTORY_JSON_PATH,
-        help=f"Path to save training history JSON. Default: {DEFAULT_HISTORY_JSON_PATH}",
+        default=None,
+        help=f"Path to save training history JSON.",
     )
     parser.add_argument(
         "--history-csv",
         type=Path,
-        default=DEFAULT_HISTORY_CSV_PATH,
-        help=f"Path to save training history CSV. Default: {DEFAULT_HISTORY_CSV_PATH}",
+        default=None,
+        help=f"Path to save training history CSV.",
     )
     parser.add_argument(
         "--plot-output",
         type=Path,
-        default=DEFAULT_TRAINING_CURVES_PATH,
-        help=f"Path to save training curves PNG. Default: {DEFAULT_TRAINING_CURVES_PATH}",
+        default=None,
+        help=f"Path to save training curves PNG.",
     )
     parser.add_argument(
         "--epochs",
@@ -112,11 +123,35 @@ def main() -> int:
     """Execute training CLI."""
     args = parse_args()
 
+    # Determine default paths based on model type
+    is_transfer = args.model_type.lower() in {"transfer", "transfer_mobilenetv2", "mobilenetv2"}
+    model_output = (
+        args.model_output
+        if args.model_output is not None
+        else (TRANSFER_MODEL_PATH if is_transfer else BASELINE_MODEL_PATH)
+    )
+    history_json = (
+        args.history_json
+        if args.history_json is not None
+        else (DEFAULT_TRANSFER_HISTORY_JSON_PATH if is_transfer else DEFAULT_HISTORY_JSON_PATH)
+    )
+    history_csv = (
+        args.history_csv
+        if args.history_csv is not None
+        else (DEFAULT_TRANSFER_HISTORY_CSV_PATH if is_transfer else DEFAULT_HISTORY_CSV_PATH)
+    )
+    plot_output = (
+        args.plot_output
+        if args.plot_output is not None
+        else (DEFAULT_TRANSFER_TRAINING_CURVES_PATH if is_transfer else DEFAULT_TRAINING_CURVES_PATH)
+    )
+
     print("\n" + "=" * 60)
-    print("BRAIN TUMOR DETECTION: BASELINE CNN TRAINING")
+    print(f"BRAIN TUMOR DETECTION: MODEL TRAINING ({args.model_type.upper()})")
     print("=" * 60)
+    print(f"Model Type              : {args.model_type}")
     print(f"Raw Data Directory      : {args.data_dir.resolve()}")
-    print(f"Model Output Path       : {args.model_output.resolve()}")
+    print(f"Model Output Path       : {model_output.resolve()}")
     print(f"Max Epochs              : {args.epochs}")
     print(f"Batch Size              : {args.batch_size}")
     print(f"Learning Rate           : {args.lr}")
@@ -129,10 +164,11 @@ def main() -> int:
     try:
         _, result = train_baseline_model(
             data_source=args.data_dir,
-            model_output_path=args.model_output,
-            history_json_path=args.history_json,
-            history_csv_path=args.history_csv,
-            plot_output_path=args.plot_output,
+            model_type=args.model_type,
+            model_output_path=model_output,
+            history_json_path=history_json,
+            history_csv_path=history_csv,
+            plot_output_path=plot_output,
             epochs=args.epochs,
             batch_size=args.batch_size,
             learning_rate=args.lr,
@@ -145,7 +181,7 @@ def main() -> int:
             verbose=1,
         )
 
-        print("\n[SUCCESS] Baseline model training and artifact generation completed successfully.\n")
+        print("\n[SUCCESS] Model training and artifact generation completed successfully.\n")
         return 0
 
     except FileNotFoundError as fnf_err:

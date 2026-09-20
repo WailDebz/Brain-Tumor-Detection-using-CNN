@@ -69,14 +69,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-json",
         type=Path,
-        default=DEFAULT_TEST_METRICS_JSON_PATH,
-        help=f"Path to output metrics JSON file. Default: {DEFAULT_TEST_METRICS_JSON_PATH}",
+        default=None,
+        help="Path to output metrics JSON file. Default: reports/metrics/test_metrics_{model_stem}.json",
     )
     parser.add_argument(
         "--output-csv",
         type=Path,
-        default=DEFAULT_TEST_METRICS_CSV_PATH,
-        help=f"Path to output metrics CSV file. Default: {DEFAULT_TEST_METRICS_CSV_PATH}",
+        default=None,
+        help="Path to output metrics CSV file. Default: reports/metrics/test_metrics_{model_stem}.csv",
     )
     parser.add_argument(
         "--figures-dir",
@@ -97,14 +97,28 @@ def main() -> int:
     """Run model evaluation pipeline."""
     args = parse_args()
 
+    model_stem = args.model_path.stem
+    mode_suffix = f"val_tuned_{args.tuning_metric}" if args.tune_threshold else "baseline"
+    
+    output_json = (
+        args.output_json
+        if args.output_json is not None
+        else (args.figures_dir.parent / "metrics" / f"test_metrics_{model_stem}_{mode_suffix}.json")
+    )
+    output_csv = (
+        args.output_csv
+        if args.output_csv is not None
+        else (args.figures_dir.parent / "metrics" / f"test_metrics_{model_stem}_{mode_suffix}.csv")
+    )
+
     print("\n" + "=" * 64)
     print("BRAIN TUMOR DETECTION: HELD-OUT TEST BENCHMARK EVALUATION")
     print("=" * 64)
     print(f"Model Artifact Location : {args.model_path.resolve()}")
     print(f"Test Manifest Location  : {args.test_manifest.resolve()}")
     print(f"Decision Threshold Mode : {'Validation-Tuned (' + args.tuning_metric + ')' if args.tune_threshold else f'Fixed ({args.threshold})'}")
-    print(f"Output Metrics JSON     : {args.output_json.resolve()}")
-    print(f"Output Metrics CSV      : {args.output_csv.resolve()}")
+    print(f"Output Metrics JSON     : {output_json.resolve()}")
+    print(f"Output Metrics CSV      : {output_csv.resolve()}")
     print(f"Output Figures Directory: {args.figures_dir.resolve()}")
     print("-" * 64 + "\n")
 
@@ -117,8 +131,8 @@ def main() -> int:
                 metric_for_threshold=args.tuning_metric,
                 model_name=args.model_path.stem,
                 batch_size=args.batch_size,
-                metrics_json_path=args.output_json,
-                metrics_csv_path=args.output_csv,
+                metrics_json_path=output_json,
+                metrics_csv_path=output_csv,
                 figures_dir=args.figures_dir,
                 verbose=1,
             )
@@ -131,8 +145,8 @@ def main() -> int:
                 model_name=args.model_path.stem,
                 split_name="test",
                 batch_size=args.batch_size,
-                metrics_json_path=args.output_json,
-                metrics_csv_path=args.output_csv,
+                metrics_json_path=output_json,
+                metrics_csv_path=output_csv,
                 figures_dir=args.figures_dir,
                 generate_plots=True,
                 verbose=1,

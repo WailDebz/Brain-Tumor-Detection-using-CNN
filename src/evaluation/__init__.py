@@ -1,5 +1,9 @@
 """Evaluation metrics and diagnostic visualization utilities."""
 
+from src.evaluation.comparison import (
+    ModelComparisonEntry,
+    generate_comparison_report,
+)
 from src.evaluation.evaluator import (
     evaluate_model_on_manifest,
     evaluate_with_validation_threshold_tuning,
@@ -27,6 +31,7 @@ from src.evaluation.visualizer import (
 
 __all__ = [
     "EvaluationReport",
+    "ModelComparisonEntry",
     "apply_decision_threshold",
     "calculate_accuracy",
     "calculate_average_precision",
@@ -41,6 +46,7 @@ __all__ = [
     "extract_confusion_matrix_counts",
     "find_optimal_threshold_on_validation",
     "generate_all_evaluation_figures",
+    "generate_comparison_report",
     "plot_confusion_matrix",
     "plot_precision_recall_curve",
     "plot_roc_curve",
