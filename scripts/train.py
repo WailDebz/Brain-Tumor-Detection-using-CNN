@@ -15,6 +15,10 @@ from src.config import (
     DEFAULT_DROPOUT_RATE,
     DEFAULT_EARLY_STOPPING_PATIENCE,
     DEFAULT_EPOCHS,
+    DEFAULT_FINETUNED_HISTORY_CSV_PATH,
+    DEFAULT_FINETUNED_HISTORY_JSON_PATH,
+    DEFAULT_FINETUNED_TRAINING_CURVES_PATH,
+    DEFAULT_FINETUNING_LEARNING_RATE,
     DEFAULT_HISTORY_CSV_PATH,
     DEFAULT_HISTORY_JSON_PATH,
     DEFAULT_L2_REGULARIZATION,
@@ -25,6 +29,7 @@ from src.config import (
     DEFAULT_TRANSFER_HISTORY_CSV_PATH,
     DEFAULT_TRANSFER_HISTORY_JSON_PATH,
     DEFAULT_TRANSFER_TRAINING_CURVES_PATH,
+    FINETUNED_TRANSFER_MODEL_PATH,
     RANDOM_SEED,
     RAW_DATA_DIR,
     TRANSFER_MODEL_PATH,
@@ -41,8 +46,15 @@ def parse_args() -> argparse.Namespace:
         "--model-type",
         type=str,
         default="cnn",
-        choices=["cnn", "transfer_mobilenetv2", "transfer"],
-        help="Architecture type: 'cnn' (custom baseline) or 'transfer_mobilenetv2' (frozen MobileNetV2). Default: cnn",
+        choices=[
+            "cnn",
+            "transfer_mobilenetv2",
+            "transfer",
+            "transfer_mobilenetv2_finetuned",
+            "transfer_finetuned",
+            "finetuned",
+        ],
+        help="Architecture type: 'cnn' (custom baseline), 'transfer_mobilenetv2' (frozen MobileNetV2), or 'transfer_mobilenetv2_finetuned' (fine-tuned MobileNetV2). Default: cnn",
     )
     parser.add_argument(
         "--data-dir",
@@ -54,25 +66,25 @@ def parse_args() -> argparse.Namespace:
         "--model-output",
         type=Path,
         default=None,
-        help=f"Path to save the best trained .keras model artifact.",
+        help="Path to save the best trained .keras model artifact.",
     )
     parser.add_argument(
         "--history-json",
         type=Path,
         default=None,
-        help=f"Path to save training history JSON.",
+        help="Path to save training history JSON.",
     )
     parser.add_argument(
         "--history-csv",
         type=Path,
         default=None,
-        help=f"Path to save training history CSV.",
+        help="Path to save training history CSV.",
     )
     parser.add_argument(
         "--plot-output",
         type=Path,
         default=None,
-        help=f"Path to save training curves PNG.",
+        help="Path to save training curves PNG.",
     )
     parser.add_argument(
         "--epochs",
@@ -89,8 +101,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--lr",
         type=float,
-        default=DEFAULT_LEARNING_RATE,
-        help=f"Initial Adam learning rate. Default: {DEFAULT_LEARNING_RATE}",
+        default=None,
+        help="Initial Adam learning rate. Default: 1e-3 (CNN / Frozen) or 1e-5 (Fine-tuned).",
     )
     parser.add_argument(
         "--l2-reg",
@@ -123,28 +135,42 @@ def main() -> int:
     """Execute training CLI."""
     args = parse_args()
 
-    # Determine default paths based on model type
-    is_transfer = args.model_type.lower() in {"transfer", "transfer_mobilenetv2", "mobilenetv2"}
-    model_output = (
-        args.model_output
-        if args.model_output is not None
-        else (TRANSFER_MODEL_PATH if is_transfer else BASELINE_MODEL_PATH)
-    )
-    history_json = (
-        args.history_json
-        if args.history_json is not None
-        else (DEFAULT_TRANSFER_HISTORY_JSON_PATH if is_transfer else DEFAULT_HISTORY_JSON_PATH)
-    )
-    history_csv = (
-        args.history_csv
-        if args.history_csv is not None
-        else (DEFAULT_TRANSFER_HISTORY_CSV_PATH if is_transfer else DEFAULT_HISTORY_CSV_PATH)
-    )
-    plot_output = (
-        args.plot_output
-        if args.plot_output is not None
-        else (DEFAULT_TRANSFER_TRAINING_CURVES_PATH if is_transfer else DEFAULT_TRAINING_CURVES_PATH)
-    )
+    # Determine default paths and learning rate based on model type
+    is_finetuned = args.model_type.lower() in {
+        "transfer_mobilenetv2_finetuned",
+        "transfer_finetuned",
+        "finetuned",
+    }
+    is_transfer_frozen = args.model_type.lower() in {
+        "transfer",
+        "transfer_mobilenetv2",
+        "mobilenetv2",
+        "transfer_frozen",
+    }
+
+    if is_finetuned:
+        default_model_output = FINETUNED_TRANSFER_MODEL_PATH
+        default_history_json = DEFAULT_FINETUNED_HISTORY_JSON_PATH
+        default_history_csv = DEFAULT_FINETUNED_HISTORY_CSV_PATH
+        default_plot_output = DEFAULT_FINETUNED_TRAINING_CURVES_PATH
+        effective_lr = args.lr if args.lr is not None else DEFAULT_FINETUNING_LEARNING_RATE
+    elif is_transfer_frozen:
+        default_model_output = TRANSFER_MODEL_PATH
+        default_history_json = DEFAULT_TRANSFER_HISTORY_JSON_PATH
+        default_history_csv = DEFAULT_TRANSFER_HISTORY_CSV_PATH
+        default_plot_output = DEFAULT_TRANSFER_TRAINING_CURVES_PATH
+        effective_lr = args.lr if args.lr is not None else DEFAULT_LEARNING_RATE
+    else:
+        default_model_output = BASELINE_MODEL_PATH
+        default_history_json = DEFAULT_HISTORY_JSON_PATH
+        default_history_csv = DEFAULT_HISTORY_CSV_PATH
+        default_plot_output = DEFAULT_TRAINING_CURVES_PATH
+        effective_lr = args.lr if args.lr is not None else DEFAULT_LEARNING_RATE
+
+    model_output = args.model_output if args.model_output is not None else default_model_output
+    history_json = args.history_json if args.history_json is not None else default_history_json
+    history_csv = args.history_csv if args.history_csv is not None else default_history_csv
+    plot_output = args.plot_output if args.plot_output is not None else default_plot_output
 
     print("\n" + "=" * 60)
     print(f"BRAIN TUMOR DETECTION: MODEL TRAINING ({args.model_type.upper()})")
@@ -154,7 +180,7 @@ def main() -> int:
     print(f"Model Output Path       : {model_output.resolve()}")
     print(f"Max Epochs              : {args.epochs}")
     print(f"Batch Size              : {args.batch_size}")
-    print(f"Learning Rate           : {args.lr}")
+    print(f"Learning Rate           : {effective_lr}")
     print(f"L2 Regularization       : {args.l2_reg}")
     print(f"Dropout Rate            : {args.dropout}")
     print(f"Early Stopping Patience : {args.patience}")
@@ -171,7 +197,7 @@ def main() -> int:
             plot_output_path=plot_output,
             epochs=args.epochs,
             batch_size=args.batch_size,
-            learning_rate=args.lr,
+            learning_rate=effective_lr,
             l2_reg=args.l2_reg,
             dropout_rate=args.dropout,
             early_stopping_patience=args.patience,

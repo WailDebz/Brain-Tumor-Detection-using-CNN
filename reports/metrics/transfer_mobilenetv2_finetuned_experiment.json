@@ -1,0 +1,117 @@
+{
+  "experiment_name": "transfer_mobilenetv2_finetuned",
+  "model_name": "brain_tumor_mobilenetv2_finetuned",
+  "pretrained_backbone": "MobileNetV2 (ImageNet-1k)",
+  "backbone_configuration": {
+    "total_backbone_layers": 154,
+    "frozen_layers": "Layers 0 to 142 (Blocks 1 to 15)",
+    "unfrozen_layers": "Layers 143 to 153 (Block 16: block_16_expand, block_16_depthwise, block_16_project + Conv_1)",
+    "batch_normalization_treatment": "All BatchNormalization layers across the entire backbone (layers 0..153) are strictly frozen (trainable=False) to prevent degradation of running statistics on small medical batches."
+  },
+  "dataset_provenance": {
+    "dataset_name": "Brain MRI Images for Brain Tumor Detection (Navoneel Chakrabarty / Kaggle)",
+    "total_scanned_files": 253,
+    "exact_duplicates_filtered_by_sha256": 25,
+    "unique_samples_retained": 228,
+    "unique_class_distribution": {
+      "no": 87,
+      "yes": 141
+    },
+    "metadata_limitations": "Dataset metadata does not contain patient IDs, subject identifiers, or DICOM headers. Deduplication is performed at the exact file level via SHA-256 hashing. Patient-level independence cannot be established from the available dataset metadata."
+  },
+  "splitting_strategy": {
+    "method": "Stratified train/val/test on original unique samples before augmentation",
+    "seed": 42,
+    "ratios": {
+      "train": 0.70,
+      "val": 0.15,
+      "test": 0.15
+    },
+    "partition_counts": {
+      "train": 159,
+      "val": 34,
+      "test": 35
+    },
+    "partition_class_distribution": {
+      "train": {
+        "no": 61,
+        "yes": 98
+      },
+      "val": {
+        "no": 13,
+        "yes": 21
+      },
+      "test": {
+        "no": 13,
+        "yes": 22
+      }
+    },
+    "leakage_audit": {
+      "train_val_path_overlap": 0,
+      "train_test_path_overlap": 0,
+      "val_test_path_overlap": 0,
+      "train_val_hash_overlap": 0,
+      "train_test_hash_overlap": 0,
+      "val_test_hash_overlap": 0,
+      "is_leak_free": true
+    }
+  },
+  "augmentation_policy": {
+    "execution_mode": "Online in-memory tf.data batch augmentation",
+    "applied_splits": ["train"],
+    "unaugmented_splits": ["val", "test"],
+    "transformations": [
+      "RandomFlip(horizontal)",
+      "RandomRotation(factor=0.08)",
+      "RandomTranslation(height_factor=0.05, width_factor=0.05)",
+      "RandomZoom(height_factor=0.05, width_factor=0.05)"
+    ],
+    "offline_disk_augmentation": false
+  },
+  "model_architecture": {
+    "type": "Transfer Learning (Controlled Fine-Tuning)",
+    "input_shape": [90, 90, 1],
+    "total_parameters": 2340033,
+    "trainable_parameters": 961089,
+    "non_trainable_parameters": 1378944,
+    "head_architecture": "GlobalAveragePooling2D -> Dense(64, ReLU, L2=1e-4) -> Dropout(0.3) -> Dense(1, Sigmoid)"
+  },
+  "hyperparameters": {
+    "optimizer": "Adam",
+    "learning_rate": 1e-05,
+    "loss": "BinaryCrossentropy",
+    "batch_size": 32,
+    "max_epochs": 30,
+    "early_stopping_patience": 8,
+    "reduce_lr_patience": 4,
+    "reduce_lr_factor": 0.5,
+    "min_lr": 1e-06
+  },
+  "training_execution_results": {
+    "epochs_requested": 30,
+    "epochs_completed": 15,
+    "early_stopping_triggered_epoch": 15,
+    "best_validation_epoch": 7,
+    "best_validation_loss": 0.2511049509048462,
+    "best_validation_accuracy": 0.9117647051811218
+  },
+  "test_set_usage_disclosure": "The held-out 35-image test partition was NOT accessed, evaluated, or inspected during this fine-tuning experiment. This ensures strict isolation from the exploratory benchmark previously conducted in Stage 4A.",
+  "artifact_paths": {
+    "raw_data_dir": "data/raw",
+    "train_manifest": "data/processed/train_manifest.csv",
+    "val_manifest": "data/processed/val_manifest.csv",
+    "test_manifest": "data/processed/test_manifest.csv",
+    "full_split_manifest": "data/processed/full_split_manifest.csv",
+    "model_artifact": "models/brain_tumor_mobilenetv2_finetuned.keras",
+    "history_json": "reports/metrics/training_history_transfer_mobilenetv2_finetuned.json",
+    "history_csv": "reports/metrics/training_history_transfer_mobilenetv2_finetuned.csv",
+    "training_curves_plot": "reports/figures/training_curves_transfer_mobilenetv2_finetuned.png"
+  },
+  "execution_environment": {
+    "python_version": "3.13.0",
+    "tensorflow_version": "2.21.0",
+    "keras_version": "3.15.1",
+    "numpy_version": "2.5.3",
+    "device": "CPU"
+  }
+}

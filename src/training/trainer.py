@@ -13,6 +13,7 @@ from src.config import (
     DEFAULT_DROPOUT_RATE,
     DEFAULT_EARLY_STOPPING_PATIENCE,
     DEFAULT_EPOCHS,
+    DEFAULT_FINETUNING_LEARNING_RATE,
     DEFAULT_HISTORY_CSV_PATH,
     DEFAULT_HISTORY_JSON_PATH,
     DEFAULT_IMAGE_SIZE,
@@ -23,9 +24,11 @@ from src.config import (
     DEFAULT_REDUCE_LR_PATIENCE,
     DEFAULT_SPLIT_RATIOS,
     DEFAULT_TRAINING_CURVES_PATH,
+    DEFAULT_UNFREEZE_FROM_LAYER,
     NUM_CHANNELS,
     RANDOM_SEED,
     RAW_DATA_DIR,
+    TRANSFER_MODEL_PATH,
 )
 from src.data.ingestion import scan_and_ingest_data
 from src.data.loader import build_tf_dataset
@@ -234,16 +237,29 @@ def train_baseline_model(
         seed=seed,
     )
 
-    # Step 4: Build Model Architecture (Custom CNN or Transfer Learning)
+    # Step 4: Build Model Architecture (Custom CNN, Frozen Transfer, or Fine-Tuned Transfer)
     input_shape = (DEFAULT_IMAGE_SIZE[1], DEFAULT_IMAGE_SIZE[0], NUM_CHANNELS)
-    if model_type.lower() in {"transfer", "transfer_mobilenetv2", "mobilenetv2"}:
+    if model_type.lower() in {"transfer_mobilenetv2_finetuned", "transfer_finetuned", "finetuned"}:
+        eff_lr = learning_rate if learning_rate != DEFAULT_LEARNING_RATE else DEFAULT_FINETUNING_LEARNING_RATE
+        warm_start_weights = TRANSFER_MODEL_PATH if TRANSFER_MODEL_PATH.exists() else None
+        model = build_transfer_model(
+            input_shape=input_shape,
+            learning_rate=eff_lr,
+            l2_reg=l2_reg,
+            dropout_rate=dropout_rate,
+            fine_tune=True,
+            unfreeze_from_layer=DEFAULT_UNFREEZE_FROM_LAYER,
+            weights_path=warm_start_weights,
+            name="brain_tumor_mobilenetv2_finetuned",
+        )
+    elif model_type.lower() in {"transfer", "transfer_mobilenetv2", "mobilenetv2", "transfer_frozen"}:
         model = build_transfer_model(
             input_shape=input_shape,
             learning_rate=learning_rate,
             l2_reg=l2_reg,
             dropout_rate=dropout_rate,
             fine_tune=False,
-            name="brain_tumor_transfer_mobilenetv2",
+            name="brain_tumor_transfer_mobilenetv2_frozen",
         )
     else:
         model = build_cnn_model(

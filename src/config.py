@@ -21,6 +21,7 @@ REPORTS_METRICS_DIR: Final[Path] = REPORTS_DIR / "metrics"
 ORIGINAL_LEAKED_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_detector.keras"
 BASELINE_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_cnn_baseline.keras"
 TRANSFER_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_mobilenetv2_frozen.keras"
+FINETUNED_TRANSFER_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_mobilenetv2_finetuned.keras"
 DEFAULT_MODEL_PATH: Final[Path] = ORIGINAL_LEAKED_MODEL_PATH  # Maintained for app until new model evaluated
 
 # Image processing specifications
@@ -47,6 +48,8 @@ DEFAULT_SPLIT_RATIOS: Final[Tuple[float, float, float]] = (0.70, 0.15, 0.15)
 DEFAULT_BATCH_SIZE: Final[int] = 32
 DEFAULT_EPOCHS: Final[int] = 30
 DEFAULT_LEARNING_RATE: Final[float] = 1e-3
+DEFAULT_FINETUNING_LEARNING_RATE: Final[float] = 1e-5
+DEFAULT_UNFREEZE_FROM_LAYER: Final[int] = 143
 DEFAULT_L2_REGULARIZATION: Final[float] = 1e-4
 DEFAULT_DROPOUT_RATE: Final[float] = 0.3
 
@@ -70,6 +73,20 @@ DEFAULT_TRANSFER_HISTORY_CSV_PATH: Final[Path] = (
 )
 DEFAULT_TRANSFER_TRAINING_CURVES_PATH: Final[Path] = (
     REPORTS_FIGURES_DIR / "training_curves_transfer_mobilenetv2_frozen.png"
+)
+
+# Default output reporting paths - Transfer Learning (MobileNetV2 Fine-Tuned)
+DEFAULT_FINETUNED_HISTORY_JSON_PATH: Final[Path] = (
+    REPORTS_METRICS_DIR / "training_history_transfer_mobilenetv2_finetuned.json"
+)
+DEFAULT_FINETUNED_HISTORY_CSV_PATH: Final[Path] = (
+    REPORTS_METRICS_DIR / "training_history_transfer_mobilenetv2_finetuned.csv"
+)
+DEFAULT_FINETUNED_TRAINING_CURVES_PATH: Final[Path] = (
+    REPORTS_FIGURES_DIR / "training_curves_transfer_mobilenetv2_finetuned.png"
+)
+DEFAULT_FINETUNED_EXPERIMENT_RECORD_PATH: Final[Path] = (
+    REPORTS_METRICS_DIR / "transfer_mobilenetv2_finetuned_experiment.json"
 )
 
 # Default evaluation paths

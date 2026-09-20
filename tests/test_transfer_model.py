@@ -14,7 +14,7 @@ def test_build_transfer_model_structure():
     model = build_transfer_model(input_shape=(90, 90, 1), fine_tune=False)
 
     assert isinstance(model, tf.keras.Model)
-    assert model.name == "brain_tumor_transfer_mobilenetv2"
+    assert model.name == "brain_tumor_transfer_mobilenetv2_frozen"
     assert model.input_shape == (None, 90, 90, 1)
     assert model.output_shape == (None, 1)
 
@@ -75,3 +75,62 @@ def test_transfer_model_save_and_load(tmp_path: Path):
     assert loaded_model.input_shape == (None, 90, 90, 1)
     assert loaded_model.output_shape == (None, 1)
     assert loaded_model.count_params() == model.count_params()
+
+
+def test_build_transfer_model_finetune_configuration():
+    """Verify fine-tuned model has top backbone layers trainable and head trainable."""
+    import tensorflow as tf
+
+    model = build_transfer_model(
+        input_shape=(90, 90, 1),
+        fine_tune=True,
+        unfreeze_from_layer=143,
+        learning_rate=1e-5,
+    )
+
+    assert model.name == "brain_tumor_transfer_mobilenetv2_finetuned"
+
+    total_params = model.count_params()
+    trainable_params = sum(v.numpy().size for v in model.trainable_variables)
+    non_trainable_params = sum(v.numpy().size for v in model.non_trainable_variables)
+
+    # 879,040 backbone trainable + 82,049 head trainable = 961,089 trainable params
+    assert total_params == 2_340_033
+    assert trainable_params == 961_089
+    assert non_trainable_params == 1_378_946
+
+
+def test_batchnormalization_layers_strictly_frozen_in_finetuning():
+    """Verify all BatchNormalization layers in the backbone have trainable=False."""
+    import tensorflow as tf
+
+    model = build_transfer_model(
+        input_shape=(90, 90, 1),
+        fine_tune=True,
+        unfreeze_from_layer=143,
+    )
+
+    # Find the backbone Functional layer
+    backbone = next(l for l in model.layers if "mobilenetv2" in l.name)
+
+    bn_layers = [l for l in backbone.layers if isinstance(l, tf.keras.layers.BatchNormalization)]
+    assert len(bn_layers) > 0, "Expected MobileNetV2 backbone to contain BatchNormalization layers."
+
+    # All BN layers must be non-trainable
+    for bn in bn_layers:
+        assert bn.trainable is False, f"BatchNormalization layer {bn.name} must have trainable=False."
+
+
+def test_finetuned_model_save_and_load(tmp_path: Path):
+    """Verify fine-tuned model saves and reloads with identical parameter counts."""
+    import tensorflow as tf
+
+    model = build_transfer_model(input_shape=(90, 90, 1), fine_tune=True)
+    save_path = tmp_path / "finetuned_test.keras"
+
+    model.save(str(save_path))
+    assert save_path.exists()
+
+    loaded = tf.keras.models.load_model(str(save_path))
+    assert loaded.count_params() == model.count_params()
+
