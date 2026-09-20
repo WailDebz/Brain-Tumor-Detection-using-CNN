@@ -60,7 +60,7 @@ To ensure scientific validity, Grad-CAM utilizes the exact same deterministic pr
 - **Positive Class ($c = 1$, Tumor):** Visualizes spatial regions whose feature activations increase the predicted probability of tumor presence.
 - **Negative Class ($c = 0$, No Tumor):** Visualizes spatial regions whose feature activations decrease the predicted probability of tumor presence (increase $1 - p$).
 - **Methodological Caveat on Binary Sigmoid Grad-CAM:**  
-  Because $\frac{\partial (1-p)}{\partial A} = - \frac{\partial p}{\partial A}$, negative-class Grad-CAM reflects inverse gradient directions. Saliency maps for negative predictions highlight areas that suppress tumor confidence, which does not represent anatomical "healthy tissue segmentation."
+  Because $\frac{\partial (1-p)}{\partial A} = - \frac{\partial p}{\partial A}$, negative-class Grad-CAM reflects inverse gradient directions. Saliency maps for negative predictions highlight areas that suppress the tumor output score, which does not represent anatomical "healthy tissue segmentation."
 
 ---
 

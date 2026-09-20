@@ -22,7 +22,8 @@ ORIGINAL_LEAKED_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_detector.ker
 BASELINE_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_cnn_baseline.keras"
 TRANSFER_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_mobilenetv2_frozen.keras"
 FINETUNED_TRANSFER_MODEL_PATH: Final[Path] = MODELS_DIR / "brain_tumor_mobilenetv2_finetuned.keras"
-DEFAULT_MODEL_PATH: Final[Path] = ORIGINAL_LEAKED_MODEL_PATH  # Maintained for app until new model evaluated
+PRIMARY_APP_MODEL_PATH: Final[Path] = TRANSFER_MODEL_PATH
+DEFAULT_MODEL_PATH: Final[Path] = PRIMARY_APP_MODEL_PATH  # Primary model for inference and webapp
 
 # Image processing specifications
 DEFAULT_IMAGE_SIZE: Final[Tuple[int, int]] = (90, 90)

@@ -45,9 +45,10 @@ pip install -e ".[dev]"
 
 ## 3. Repository Structure & Artifacts
 
-- **Model Artifact Location:**  
-  The trained Keras model is expected at `models/brain_tumor_detector.keras`.  
-  The application automatically resolves this path relative to the project root.
+- **Model Artifact Locations:**  
+  - Primary Application Model: `models/brain_tumor_mobilenetv2_frozen.keras` (MobileNetV2 feature extractor).
+  - Baseline Custom CNN: `models/brain_tumor_cnn_baseline.keras`.
+  - Historical Model: `models/brain_tumor_detector.keras` (preserved reference).
 - **Original Notebook Location:**  
   The historical reference notebook is archived at `notebooks/archive/original_brain_tumor_detection.ipynb`.
 
@@ -129,13 +130,25 @@ This evaluation pipeline will:
 
 ## 7. Running the Streamlit Web Application
 
-Launch the interactive Streamlit interface from the repository root:
+Launch the modernized interactive Streamlit application from the repository root:
 
 ```bash
-streamlit run app/streamlit_app.py
+# Using the virtual environment's Python interpreter:
+python -m streamlit run app/streamlit_app.py
+
+# Or on Windows PowerShell directly:
+.\.venv\Scripts\python.exe -m streamlit run app/streamlit_app.py
 ```
 
-The application will open in your default browser at `http://localhost:8501`.
+The web interface will open in your default browser at `http://localhost:8501`.
+
+### Application Architecture:
+- **Primary Model:** MobileNetV2 frozen feature extractor (`models/brain_tumor_mobilenetv2_frozen.keras`), cached via `@st.cache_resource`.
+- **Input Validation:** Inspects uploaded files for valid image headers, non-zero dimensions, and formats (RGB, RGBA, Grayscale).
+- **Inference Pipeline:** Reuses `src/data/preprocessing.py` for standard $(90, 90, 1)$ normalization in $[0.0, 1.0]$.
+- **Prediction Display:** Reports predicted class (`Tumor` or `No Tumor`) and continuous model predicted probability at the fixed $0.50$ decision threshold.
+- **Explainability:** Generates and displays 3-panel Grad-CAM saliency visualizations (Original Scan, Jet Heatmap, Superimposed Overlay) computed via `src/explainability/gradcam.py`.
+- **Safety:** Prominently presents a non-diagnostic research disclaimer.
 
 ---
 
@@ -144,13 +157,11 @@ The application will open in your default browser at `http://localhost:8501`.
 Execute the unit test suite with `pytest`:
 
 ```bash
-pytest
-```
+# Fast quiet run:
+python -m pytest -q
 
-To run with verbose output:
-
-```bash
-pytest -v
+# Or with verbose test breakdown:
+python -m pytest -v
 ```
 
 
