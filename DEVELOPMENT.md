@@ -78,21 +78,33 @@ To prepare, validate, deduplicate, and partition the dataset using the repositor
 
 ---
 
-## 5. Training the Corrected Baseline CNN Model
+## 5. Model Training
 
-To train the modernized baseline CNN on the leak-free dataset partitions:
+To train the custom baseline CNN on the leak-free dataset partitions:
 
 ```bash
-python scripts/train.py --data-dir data/raw --epochs 30 --batch-size 32
+python scripts/train.py --model-type cnn --data-dir data/raw --epochs 30 --batch-size 32
 ```
 
-This training pipeline will:
+To train the MobileNetV2 frozen feature extractor:
+
+```bash
+python scripts/train.py --model-type transfer_mobilenetv2 --data-dir data/raw --epochs 30 --batch-size 32
+```
+
+To train the controlled fine-tuning MobileNetV2 model:
+
+```bash
+python scripts/train.py --model-type transfer_mobilenetv2_finetuned --data-dir data/raw --epochs 30 --lr 1e-5
+```
+
+The training pipeline will:
 - Partition the dataset using the leak-free stratified split ($70\%$ train, $15\%$ val, $15\%$ test).
 - Apply online data augmentation strictly to the training dataset.
-- Train the modernized CNN architecture with `EarlyStopping`, `ReduceLROnPlateau`, and `ModelCheckpoint`.
+- Train with `EarlyStopping`, `ReduceLROnPlateau`, and `ModelCheckpoint`.
 - Monitor validation loss (the held-out test partition is never accessed during training).
-- Save the best model artifact to `models/brain_tumor_cnn_baseline.keras`.
-- Export training history to `reports/metrics/training_history_baseline.json` and loss/accuracy curves to `reports/figures/training_curves_baseline.png`.
+- Save the best model artifact to `models/`.
+- Export training history to `reports/metrics/` and loss/accuracy curves to `reports/figures/`.
 
 ---
 
@@ -120,35 +132,35 @@ python scripts/evaluate.py \
 This evaluation pipeline will:
 - Run deterministic, unaugmented inference on the pristine test partition.
 - Calculate clinical metrics: Accuracy, Sensitivity (Recall), Specificity, Precision, F1-Score, ROC-AUC, and PR-AUC.
-- Export machine-readable metrics to `reports/metrics/test_metrics_baseline.json` and `test_metrics_baseline.csv`.
-- Generate annotated medical diagnostic plots in `reports/figures/`:
-  - Confusion Matrix (`reports/figures/confusion_matrix_test.png`)
-  - ROC Curve (`reports/figures/roc_curve_test.png`)
-  - Precision-Recall Curve (`reports/figures/pr_curve_test.png`)
+- Export machine-readable metrics to `reports/metrics/test_metrics_{model_name}_baseline.json` and `test_metrics_{model_name}_baseline.csv`.
+- Generate model-specific diagnostic plots in `reports/figures/`:
+  - Confusion Matrix (`reports/figures/confusion_matrix_test_{model_name}.png`)
+  - ROC Curve (`reports/figures/roc_curve_test_{model_name}.png`)
+  - Precision-Recall Curve (`reports/figures/pr_curve_test_{model_name}.png`)
 
 ---
 
 ## 7. Running the Streamlit Web Application
 
-Launch the modernized interactive Streamlit application from the repository root:
+Launch the interactive Streamlit application from the repository root:
 
 ```bash
 # Using the virtual environment's Python interpreter:
 python -m streamlit run app/streamlit_app.py
 
-# Or on Windows PowerShell directly:
+# Or on Windows PowerShell:
 .\.venv\Scripts\python.exe -m streamlit run app/streamlit_app.py
 ```
 
 The web interface will open in your default browser at `http://localhost:8501`.
 
-### Application Architecture:
-- **Primary Model:** MobileNetV2 frozen feature extractor (`models/brain_tumor_mobilenetv2_frozen.keras`), cached via `@st.cache_resource`.
-- **Input Validation:** Inspects uploaded files for valid image headers, non-zero dimensions, and formats (RGB, RGBA, Grayscale).
-- **Inference Pipeline:** Reuses `src/data/preprocessing.py` for standard $(90, 90, 1)$ normalization in $[0.0, 1.0]$.
+### Application Summary:
+- **Primary Model:** MobileNetV2 frozen feature extractor (`models/brain_tumor_mobilenetv2_frozen.keras`), cached with `@st.cache_resource`.
+- **Input Validation:** Checks uploaded files for valid image headers, non-zero dimensions, and formats (RGB, RGBA, Grayscale).
+- **Inference Pipeline:** Reuses `src/data/preprocessing.py` for standard $(90, 90, 1)$ normalization in $[0, 1]$.
 - **Prediction Display:** Reports predicted class (`Tumor` or `No Tumor`) and continuous model predicted probability at the fixed $0.50$ decision threshold.
-- **Explainability:** Generates and displays 3-panel Grad-CAM saliency visualizations (Original Scan, Jet Heatmap, Superimposed Overlay) computed via `src/explainability/gradcam.py`.
-- **Safety:** Prominently presents a non-diagnostic research disclaimer.
+- **Explainability:** Displays 3-panel Grad-CAM saliency visualizations (Input Scan, Heatmap, Overlay) computed via `src/explainability/gradcam.py`.
+- **Safety:** Displays a non-diagnostic research disclaimer.
 
 ---
 

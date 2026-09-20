@@ -89,8 +89,5 @@ try:
 except Exception as e:
     log(f"Historical model load result: {e}")
 
-out_path = Path("reports/env_verification.txt")
-out_path.parent.mkdir(parents=True, exist_ok=True)
-out_path.write_text("\n".join(output_lines), encoding="utf-8")
-print(f"Written verification report to {out_path.resolve()}")
+
 
